@@ -39,6 +39,11 @@ RUN cd /tmp && \
     cd psptoolchain && \
     ./toolchain.sh
 
+RUN find "$PSPDEV/libexec/gcc/psp/4.9.3" -type f -name "*.so*" -exec strip --strip-unneeded '{}' \;
+RUN find "$PSPDEV/lib" -maxdepth 1 -type f -name "*.a" -exec strip --strip-debug '{}' \;
+RUN find "$PSPDEV/lib/gcc" "$PSPDEV/psp/lib" "$PSPSDK/lib" -type f -name "*.a" -exec psp-strip --strip-debug '{}' \;
+RUN find "$PSPDEV/bin" "$PSPDEV/psp/bin" "$PSPDEV/libexec/gcc/psp/4.9.3" -type f ! -name "*.so*" -exec strip --strip-all '{}' \;
+
 
 FROM ubuntu:18.04
 
