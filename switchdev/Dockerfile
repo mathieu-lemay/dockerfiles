@@ -1,8 +1,6 @@
 FROM debian:10-slim
 
-MAINTAINER Mathieu Lemay <acidrain1@gmail.com>
-
-ARG uid=1000
+LABEL maintainer="Mathieu Lemay <acidrain1@gmail.com>"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEVKITPRO=/opt/devkitpro
@@ -10,34 +8,41 @@ ENV DEVKITARM=/opt/devkitpro/devkitARM
 ENV PATH=${DEVKITPRO}/tools/bin:$PATH
 
 RUN apt-get update && \
-    apt-get install -y apt-utils && \
-    apt-get install -y --no-install-recommends sudo ca-certificates pkg-config curl \
+    apt-get install -y --no-install-recommends apt-utils sudo ca-certificates pkg-config curl \
         wget bzip2 xz-utils make git bsdtar doxygen gnupg zip build-essential \
         python python-dev python-pip python-setuptools zsh && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install pycryptodome
 
-RUN wget "https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb" && \
-    dpkg -i devkitpro-pacman.deb && \
-    rm devkitpro-pacman.deb && \
-    dkp-pacman -Syu --noconfirm switch-dev switch-portlibs switch-freetype devkitARM devkitarm-rules && \
+RUN wget "https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb" && \
+    dpkg -i devkitpro-pacman.amd64.deb && \
+    rm devkitpro-pacman.amd64.deb && \
+    dkp-pacman -Syu --noconfirm switch-dev devkitARM devkitarm-rules \
+        switch-portlibs switch-freetype switch-liblzma && \
     yes | dkp-pacman -Scc
+
+ARG LIBNX_COMMIT=
 
 RUN git clone https://github.com/switchbrew/libnx.git && \
     cd libnx && \
-    make -j4 && \
+    if [ -n "${LIBNX_COMMIT}" ]; then git checkout "${LIBNX_COMMIT}"; fi && \
+    make -j12 && \
     make install && \
     cd .. && \
     rm -rf libnx
 
-RUN useradd -d /switch -m -u "$uid" -s "/bin/zsh" switch
-RUN chown -R "$uid" /switch
-RUN echo "zsh-newuser-install() { :; }" >> /etc/zsh/zshenv
+ARG uid=1000
+
+RUN useradd -d /home/switch -m -u "$uid" -s "/bin/zsh" switch
+RUN mkdir /switch
 
 USER switch
-ENV HOME=/switch
 WORKDIR /switch
 VOLUME /switch
+
+COPY zshrc /home/switch/.zshrc
+COPY prompt.zsh /home/switch/.prompt.zsh
 
 CMD /bin/zsh

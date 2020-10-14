@@ -1,0 +1,74 @@
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+# Modules Initializing {{{
+
+autoload -U compinit promptinit
+
+compinit
+promptinit
+
+# }}}
+
+# Options {{{
+
+setopt prompt_subst      # Enable parameter expansion for prompts
+setopt correct           # Enable autocorrect
+setopt auto_pushd        # Make cd push the old directory onto the directory stack
+setopt pushd_ignore_dups # Ignore duplicates when pushing directory on the stack
+setopt extendedglob      # Treat the `#', `~' and `^' characters as part of patterns for filename generation, etc.
+
+# }}}
+
+# Key Bindings {{{
+
+# Reduce ESC delay to 0.1s
+export KEYTIMEOUT=1
+
+# bind special keys according to readline configuration
+[ -f /etc/inputrc ] && eval "$(sed -n 's/^/bindkey /; s/: / /p' /etc/inputrc)" > /dev/null
+
+bindkey "^[[A" history-search-backward
+bindkey "^[[B" history-search-forward
+bindkey "^[OA" history-search-backward
+bindkey "^[OB" history-search-forward
+bindkey "^W" backward-kill-word
+bindkey "^R" history-incremental-search-backward
+
+# Make backspace and ^h work after returning from normal mode
+bindkey '^?' backward-delete-char
+bindkey '^h' backward-delete-char
+
+# }}}
+
+# Aliases {{{
+
+alias ls='ls --color=auto -v --group-directories-first'
+alias ll='ls -lh'
+alias la='ls -A'
+alias lf='ls -lhA'
+alias lk='ls -l --block-size=1k'
+alias lm='ls -l --block-size=1m'
+alias lr='ls -lArth'
+
+alias grep='grep --color=auto'
+alias make="make -j $(grep proc /proc/cpuinfo | wc -l)"
+
+# }}}
+
+# ZStyle options {{{
+
+# Add completion for cd ..
+zstyle ':completion:*' special-dirs true
+# Case insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# }}}
+
+# Prompt {{{
+
+source ~/.prompt.zsh
+
+# }}}
+
+# vi: foldmethod=marker
