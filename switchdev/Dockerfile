@@ -14,20 +14,20 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install pycryptodome
-
 RUN wget "https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb" && \
     dpkg -i devkitpro-pacman.amd64.deb && \
-    rm devkitpro-pacman.amd64.deb && \
-    dkp-pacman -Syu --noconfirm switch-dev devkitARM devkitarm-rules \
+    rm devkitpro-pacman.amd64.deb
+
+ARG LIBNX_PATHSPEC=
+
+RUN pip install pycryptodome \
+    && dkp-pacman -Syu --noconfirm switch-dev devkitARM devkitarm-rules \
         switch-portlibs switch-freetype switch-liblzma && \
     yes | dkp-pacman -Scc
 
-ARG LIBNX_COMMIT=
-
 RUN git clone https://github.com/switchbrew/libnx.git && \
     cd libnx && \
-    if [ -n "${LIBNX_COMMIT}" ]; then git checkout "${LIBNX_COMMIT}"; fi && \
+    if [ -n "${LIBNX_PATHSPEC}" ]; then git checkout "${LIBNX_PATHSPEC}"; fi && \
     make -j12 && \
     make install && \
     cd .. && \
@@ -35,8 +35,10 @@ RUN git clone https://github.com/switchbrew/libnx.git && \
 
 ARG uid=1000
 
-RUN useradd -d /home/switch -m -u "$uid" -s "/bin/zsh" switch
-RUN mkdir /switch
+COPY sudoers /etc/sudoers
+RUN chmod 440 /etc/sudoers \
+    && mkdir /switch \
+    && useradd -d /home/switch -m -u "$uid" -s "/bin/zsh" switch
 
 USER switch
 WORKDIR /switch
