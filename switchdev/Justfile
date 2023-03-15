@@ -1,0 +1,4 @@
+DOCKER_TAG := "switchdev"
+
+build:
+    docker build -t {{ DOCKER_TAG }} .
