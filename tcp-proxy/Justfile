@@ -1,0 +1,4 @@
+DOCKER_TAG := "acidrain/tcp-proxy"
+
+build:
+    docker build -t {{ DOCKER_TAG }} .
