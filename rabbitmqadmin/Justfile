@@ -1,0 +1,4 @@
+DOCKER_TAG := "acidrain/rabbitmqadmin"
+
+build:
+    docker build -t {{ DOCKER_TAG }} .
