@@ -1,4 +1,0 @@
-DOCKER_TAG := "acidrain/pgcli"
-
-build:
-    docker build -t {{ DOCKER_TAG }} .
