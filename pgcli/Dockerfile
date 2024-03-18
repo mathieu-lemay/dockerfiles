@@ -1,8 +1,8 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 LABEL maintainer "Mathieu Lemay <acidrain1@gmail.com>"
 
-ENV PGCLI_VERSION=3.5.0
+ENV PGCLI_VERSION=4.0.1
 
 RUN set -eu; \
     apk add --no-cache bash; \
