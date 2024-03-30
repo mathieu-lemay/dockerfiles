@@ -1,0 +1,5 @@
+#! /bin/bash
+
+set -eu
+
+docker run --rm -it -v "$(pwd):/switch" acidrain/switchdev:latest
